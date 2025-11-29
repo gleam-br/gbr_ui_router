@@ -1,0 +1,37 @@
+{
+  "name": "gbr-ui-router",
+  "description": "📡 Gleam UI router library",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "bunup",
+    "dev": "bunup --watch"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "author": {
+    "name": "@gleam-br",
+    "email": "contato@gleam.dev.br"
+  },
+  "keywords": [
+    "gleam",
+    "javascript",
+    "router",
+    "spa",
+    "ui"
+  ],
+  "repository": {
+    "url": "git+https://github.com/gleam-br/gbr-ui-router.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gleam-br/gbr-ui-router/issues"
+  },
+  "devDependencies": {
+    "bunup": "^0.15.14",
+    "bun-plugin-gleam": "^0.1.3"
+  }
+}
