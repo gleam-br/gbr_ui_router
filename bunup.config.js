@@ -9,5 +9,5 @@ export default defineConfig({
   format: ["esm"],
   sourcemap: "linked",
   minify: true,
-  plugins: [gleam({ force: true }), exports(), unused()]
+  plugins: [gleam({ log: 'debug', force: true }), exports(), unused()]
 });
