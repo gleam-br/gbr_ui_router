@@ -3,17 +3,24 @@
   "description": "📡 Gleam UI router library",
   "version": "0.1.0",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "license": "Apache-2.0",
   "scripts": {
     "build": "bunup",
     "dev": "bunup --watch",
     "type-check": "tsc --noEmit"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "author": {
     "name": "@gleam-br",
     "email": "contato@gleam.dev.br"

@@ -8,14 +8,14 @@
  */
 
 import {
-  main,
   setup,
   route,
   routes,
   on_uri_change,
 } from "./gbr/ui/router.gleam";
 
-main()
+//import * as navigation from "./gbr/ui/router/navigation.gleam"
+//navigation.main()
 
 /**
  * Router current href

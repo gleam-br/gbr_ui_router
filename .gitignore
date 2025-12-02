@@ -1,6 +1,3 @@
-# tests
-index.html
-
 *.beam
 *.ez
 /build
