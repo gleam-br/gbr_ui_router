@@ -8,40 +8,38 @@
  */
 
 import {
-  setup,
-  route,
-  routes,
-  on_uri_change,
+  item,
+  match,
+  current,
+  on_router,
+  on_change,
 } from "./gbr/ui/router.gleam";
-
-//import * as navigation from "./gbr/ui/router/navigation.gleam"
-//navigation.main()
 
 /**
  * Router current href
  *
  * Function not call gleam code but _is the same code_
  */
-export const currentUrl = () => {
+export const currentHref = () => {
   new URL(window.location.href)
 }
 
 /**
- * Router setup without callback on uri change
- */
-export const routerSetup = setup
-
-/**
  * Router setup routes and callback to match them
  */
-export const routerSetupRoutes = routes
-
-/**
- * Router new route item
- */
-export const routerNewRoute = route
+export const onRouter = on_router
 
 /**
  * Router current href
  */
-export const onUrlChange = on_uri_change
+export const onChange = on_change
+
+/**
+ * Router new route item
+ */
+export const itemNew = item
+
+/**
+ * Router new route item
+ */
+export const itemMatch = match

@@ -126,7 +126,7 @@ pub fn current() -> Option(uri.Uri) {
 /// - cfg: Router config type
 /// - cb: Callback on uri changes
 ///
-pub fn on_routes(
+pub fn on_router(
   items: Items(a),
   cfg: Option(Config),
   cb: OnUriItemChange(a),
@@ -153,7 +153,7 @@ pub fn on_routes(
       let route_change = route_on_uri_change(items, use_hash, cb)
 
       // set on uri change
-      on_uri_change(cfg, route_change)
+      on_change(cfg, route_change)
     }
     Error(err) ->
       error(err)
@@ -177,7 +177,7 @@ pub fn on_routes(
 /// - config: Router config type
 /// - cb: Callback function that receive `uri.Uri`
 ///
-pub fn on_uri_change(config: Option(Config), cb: OnUriChange) -> Nil {
+pub fn on_change(config: Option(Config), cb: OnUriChange) -> Nil {
   let config =
     config
     |> option.unwrap(const_config_default)
@@ -187,6 +187,9 @@ pub fn on_uri_change(config: Option(Config), cb: OnUriChange) -> Nil {
   let _ = onpopstate(config, Some(cb))
   let _ = onclick(config, Some(cb))
 }
+
+// PRIVATE
+//
 
 /// Setup router to manage state on uri changes
 ///
@@ -201,17 +204,16 @@ pub fn on_uri_change(config: Option(Config), cb: OnUriChange) -> Nil {
 ///
 /// - config: Router config type
 ///
-pub fn setup(config: Option(Config)) -> Nil {
+fn setup(config: Option(Config)) -> Nil {
   let config =
     config
     |> option.unwrap(const_config_default)
 
+  let _ = onload(config, None)
+  let _ = onhash(config, None)
   let _ = onpopstate(config, None)
   let _ = onclick(config, None)
 }
-
-// PRIVATE
-//
 
 const const_config_default = UIRouterConfig(
   prevent_default: False,
