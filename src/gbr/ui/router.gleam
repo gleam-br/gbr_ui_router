@@ -12,7 +12,6 @@ import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import gleam/regexp
 import gleam/result
 import gleam/string
 import gleam/uri
@@ -30,39 +29,8 @@ import gbr/js/jshistory
 type Config =
   UUIRouterConfig
 
-type Item(a) =
-  UIRouterItem(a)
-
-type Items(a) =
-  List(Item(a))
-
-type RouterError =
-  UIRouterError
-
-type OnUriItemChange(a) =
-  fn(uri.Uri, String, fn() -> a) -> Nil
-
 type OnUriChange =
   fn(uri.Uri) -> Nil
-
-/// Router error type
-///
-type UIRouterError {
-  UIRouterItemEmpty
-  UIRouterItemUnique
-  UIRouterItemNotFound
-  UIRouterItemRegex(regexp.CompileError)
-}
-
-/// Router item type representation of one route
-///
-/// - id: Route identification, best practice use uri path
-/// - match: Route option regex to match with uri path
-/// - render: Function to render this router item
-///
-pub opaque type UIRouterItem(a) {
-  UIRouterItem(id: String, match: Option(regexp.Regexp), render: fn() -> a)
-}
 
 /// Router config type
 ///
@@ -74,91 +42,12 @@ pub opaque type UUIRouterConfig {
   UIRouterConfig(use_hash: Bool, prevent_default: Bool)
 }
 
-/// New router item representation of one route
-///
-/// - id: Route identification, best practice use uri
-///
-pub fn item(id: String, render: fn() -> a) -> Item(a) {
-  UIRouterItem(id:, render:, match: None)
-}
-
-/// Set match regex to route item
-///
-/// - match: Regex to match with uri path and select route item
-///
-pub fn match(in: Item(a), match: String) -> Result(Item(a), String) {
-  use match <- result.map(
-    regexp.from_string(match)
-    |> result.map(Some)
-    |> result.map_error(fn(err) { err.error }),
-  )
-
-  UIRouterItem(..in, match:)
-}
-
 /// Get current windown location href
 ///
 pub fn current() -> Option(uri.Uri) {
   jscore.global()
   |> jscore.get_object_inner_key("location", "href")
   |> parse_href()
-}
-
-/// Setup router to manage state on uri and
-///
-/// This function uses route items and execute match on uri and
-///
-/// Callback is executed passing parameters:
-/// - uri: Current uri
-/// - id: Router item id
-/// - render: Router item render function
-///
-/// This function setup this events:
-///
-/// - window.onclick: User click on window and check if anchor is clicked
-///   - https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event
-/// - window.popstate: User or code change history entry
-///   - https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
-///
-/// Args:
-///
-/// - items: List of generic type routes
-/// - cfg: Router config type
-/// - cb: Callback on uri changes
-///
-pub fn on_router(
-  items: Items(a),
-  cfg: Option(Config),
-  cb: OnUriItemChange(a),
-) -> Nil {
-  let is_valid = case items {
-    [] -> Error(UIRouterItemEmpty)
-    [first, ..rest] -> unique_items(rest, first.id)
-  }
-
-  case is_valid {
-    Ok(_) -> {
-      // use hash, uri.fragment, instead uri.path
-      let use_hash =
-        option.map(cfg, fn(config) { config.use_hash })
-        |> option.unwrap(False)
-
-      // if use hash, prevent default browser reload and hash scroll
-      let cfg = case use_hash {
-        True -> option.map(cfg, cfg_prevent_default(_, True))
-        False -> cfg
-      }
-
-      // new route items on uri change
-      let route_change = route_on_uri_change(items, use_hash, cb)
-
-      // set on uri change
-      on_change(cfg, route_change)
-    }
-    Error(err) ->
-      error(err)
-      |> io.print_error()
-  }
 }
 
 /// Setup router to manage state on uri changes
@@ -182,6 +71,12 @@ pub fn on_change(config: Option(Config), cb: OnUriChange) -> Nil {
     config
     |> option.unwrap(const_config_default)
 
+  // if use hash, prevent default browser reload and hash scroll
+  let config = case config.use_hash {
+    False -> config
+    True -> cfg_prevent_default(config, True)
+  }
+
   let _ = onload(config, Some(cb))
   let _ = onhash(config, Some(cb))
   let _ = onpopstate(config, Some(cb))
@@ -190,30 +85,6 @@ pub fn on_change(config: Option(Config), cb: OnUriChange) -> Nil {
 
 // PRIVATE
 //
-
-/// Setup router to manage state on uri changes
-///
-/// This function setup events:
-///
-/// - window.onclick: User click on window and check if anchor is clicked
-///   - https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event
-/// - window.popstate: User or code change history entry
-///   - https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event
-///
-/// Args:
-///
-/// - config: Router config type
-///
-fn setup(config: Option(Config)) -> Nil {
-  let config =
-    config
-    |> option.unwrap(const_config_default)
-
-  let _ = onload(config, None)
-  let _ = onhash(config, None)
-  let _ = onpopstate(config, None)
-  let _ = onclick(config, None)
-}
 
 const const_config_default = UIRouterConfig(
   prevent_default: False,
@@ -295,37 +166,6 @@ fn on_(config, dispatch, onevent) -> Nil {
 ///
 fn cfg_prevent_default(cfg, prevent_default) {
   UIRouterConfig(..cfg, prevent_default:)
-}
-
-/// Helper return callback to on uri change with route items
-///
-fn route_on_uri_change(items, use_hash, cb) {
-  fn(href: uri.Uri) {
-    // resolve id to found
-    let id_to_found = case use_hash {
-      True -> get_hash(href)
-      // default uses uri.path
-      False -> Some(href.path)
-    }
-
-    // TODO: default route in router config type
-    let id_to_found = option.unwrap(id_to_found, "/")
-
-    // if match apply regex, else match id
-    let item_finder = fn(item: Item(a)) {
-      case item.match {
-        Some(match) -> regexp.check(match, id_to_found)
-        None -> item.id == id_to_found
-      }
-    }
-
-    // exec callback
-    case list.find(items, item_finder) {
-      Ok(item) -> cb(href, item.id, item.render)
-      Error(Nil) ->
-        io.print_error("Error router item not found " <> id_to_found)
-    }
-  }
 }
 
 /// Request animation to scroll default browser behavior
@@ -466,39 +306,6 @@ fn do_dispatch(dispatch, href) {
   case dispatch {
     Some(dispatch) -> dispatch(href)
     None -> Nil
-  }
-}
-
-/// Check is unique id items
-///
-fn unique_items(items: Items(a), id: String) {
-  let has_id = any_id_items(items, id)
-
-  // eager return
-  use <- bool.guard(has_id, Error(UIRouterItemUnique))
-
-  case items {
-    [] -> Ok(Nil)
-    [first, ..rest] -> unique_items(rest, first.id)
-  }
-}
-
-/// Check any id in items
-///
-fn any_id_items(items: Items(a), id: String) {
-  use item <- list.any(items)
-
-  item.id == id
-}
-
-/// Translate erro to string representation
-///
-fn error(error: RouterError) {
-  case error {
-    UIRouterItemEmpty -> "Error empty router items"
-    UIRouterItemNotFound -> "Error not found router Item"
-    UIRouterItemRegex(err) -> "Error parse router item regex " <> err.error
-    UIRouterItemUnique -> "Error not unique id in router items"
   }
 }
 
