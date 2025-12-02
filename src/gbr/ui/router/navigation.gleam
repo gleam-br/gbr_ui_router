@@ -15,7 +15,7 @@ pub fn main() -> Nil {
   Nil
 }
 
-fn setup() {
+pub fn setup() {
   let validation =
     jscore.global()
     |> jscore.get_object_key("navigation")
