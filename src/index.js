@@ -10,7 +10,6 @@
 import {
   item,
   match,
-  current,
   on_router,
   on_change,
 } from "./gbr/ui/router.gleam";
