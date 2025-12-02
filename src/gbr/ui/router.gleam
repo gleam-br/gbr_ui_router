@@ -182,6 +182,8 @@ pub fn on_uri_change(config: Option(Config), cb: OnUriChange) -> Nil {
     config
     |> option.unwrap(const_config_default)
 
+  let _ = onload(config, Some(cb))
+  let _ = onhash(config, Some(cb))
   let _ = onpopstate(config, Some(cb))
   let _ = onclick(config, Some(cb))
 }
@@ -260,9 +262,21 @@ fn onclick(config, dispatch) -> Nil {
 /// - dispatch: Callback executed on uri is change, if `option.Some`
 ///
 fn onpopstate(config, dispatch) -> Nil {
+  on_(config, dispatch, "popstate")
+}
+
+fn onload(config, dispatch) -> Nil {
+  on_(config, dispatch, "load")
+}
+
+fn onhash(config, dispatch) -> Nil {
+  on_(config, dispatch, "hashchange")
+}
+
+fn on_(config, dispatch, onevent) -> Nil {
   let UIRouterConfig(prevent_default:, ..) = config
 
-  use event <- jsglobal.add_event_listener("popstate")
+  use event <- jsglobal.add_event_listener(onevent)
 
   let _ = jsevent.prevent_default(event)
 
