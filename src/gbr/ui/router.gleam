@@ -237,29 +237,8 @@ fn onclick(config, dispatch) -> Nil {
   case anchor {
     None -> Nil
     Some(anchor) -> {
-      let is_external =
-        jscore.global()
-        |> jscore.get_object_inner_key("location", "host")
-        |> option.map(fn(host) {
-          let origin_host = {
-            use hostname <- option.then(anchor.host)
-            use port <- option.map(anchor.port)
-
-            hostname <> ":" <> int.to_string(port)
-          }
-          echo origin_host
-
-          case origin_host {
-            Some(origin_host) -> host != origin_host
-            None -> True
-          }
-        })
-        |> option.unwrap(True)
-
-      echo ">>>> 1"
       // eager return
-      use <- bool.guard(is_external, do_dispatch(dispatch, anchor))
-      echo ">>>> 2"
+      use <- bool.guard(is_external(anchor), do_dispatch(dispatch, anchor))
 
       // history push state
       let _ =
@@ -504,5 +483,26 @@ fn error(error: RouterError) {
     UIRouterItemNotFound -> "Error not found router Item"
     UIRouterItemRegex(err) -> "Error parse router item regex " <> err.error
     UIRouterItemUnique -> "Error not unique id in router items"
+  }
+}
+
+fn is_external(anchor: uri.Uri) {
+  let host =
+    jscore.global()
+    |> jscore.get_object_inner_key("location", "host")
+
+  use <- bool.guard(option.is_none(host), True)
+  let assert Some(host) = host
+
+  let origin_host = {
+    use hostname <- option.then(anchor.host)
+    use port <- option.map(anchor.port)
+
+    hostname <> ":" <> int.to_string(port)
+  }
+
+  case origin_host {
+    Some(origin_host) -> host != origin_host
+    None -> True
   }
 }
