@@ -50,6 +50,24 @@ pub fn current() -> Option(uri.Uri) {
   |> parse_href()
 }
 
+pub fn push_uri(url: uri.Uri) -> Result(Nil, String) {
+  uri.to_string(url)
+  |> push()
+}
+
+pub fn push(url: String) -> Result(Nil, String) {
+  jshistory.push(url)
+}
+
+pub fn replace_uri(url: uri.Uri) -> Result(Nil, String) {
+  uri.to_string(url)
+  |> replace()
+}
+
+pub fn replace(url: String) -> Result(Nil, String) {
+  jshistory.replace(url)
+}
+
 /// Setup router to manage state on uri changes
 ///
 /// This function setup events:
