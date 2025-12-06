@@ -119,8 +119,6 @@ fn onclick(config, dispatch) -> Nil {
 
   use event <- jsglobal.add_event_listener("click")
 
-  let _ = jsevent.prevent_default(event)
-
   let target = Some(jsevent.target(event))
   let anchor =
     find_anchor(target)
@@ -130,6 +128,8 @@ fn onclick(config, dispatch) -> Nil {
   case anchor {
     None -> Nil
     Some(anchor) -> {
+      let _ = jsevent.prevent_default(event)
+
       // eager return
       use <- bool.guard(is_external(anchor), do_dispatch(dispatch, anchor))
 
