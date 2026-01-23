@@ -7,7 +7,6 @@
 import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
-import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list
@@ -220,10 +219,13 @@ fn request_animation_frame(href: uri.Uri) -> jscore.RequestID {
   case hash {
     None -> jsglobal.scroll_to(0, 0)
     Some(hash) -> {
-      use _ <- function.tap(Nil)
-      use el <- result.map(jsdocument.get_element_by_id(hash))
+      let assert Ok(_) = {
+        use el <- result.map(jsdocument.get_element_by_id(hash))
 
-      jselement.scroll_into_view(el)
+        jselement.scroll_into_view(el)
+      }
+
+      Nil
     }
   }
 }

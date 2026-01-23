@@ -1,5 +1,5 @@
 name = "gbr_ui_router"
-version = "1.0.0"
+version = "1.0.1"
 target = "javascript"
 
 description = "📡 Gleam UI SPA router library"
@@ -8,8 +8,8 @@ repository = { type = "github", user = "gleam-br", repo = "gbr_ui_router" }
 # links = [{ title = "Website", href = "" }]
 
 [dependencies]
-gbr_js = "~> 1.0.3"
-gleam_stdlib = "~> 0.65.0"
+gbr_js = { path = "/work/gbr_js" }
+gleam_stdlib = "~> 0.68"
 
 [dev-dependencies]
 gleeunit = "~> 1.9.0"

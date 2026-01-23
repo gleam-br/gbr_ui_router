@@ -1,7 +1,7 @@
 {
   "name": "gbr-ui-router",
   "description": "📡 Gleam UI router library",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "type": "module",
   "files": [
     "dist",
