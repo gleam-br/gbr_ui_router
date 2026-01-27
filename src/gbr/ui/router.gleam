@@ -219,7 +219,7 @@ fn request_animation_frame(href: uri.Uri) -> jscore.RequestID {
   case hash {
     None -> jsglobal.scroll_to(0, 0)
     Some(hash) -> {
-      let assert Ok(_) = {
+      let _ = {
         use el <- result.map(jsdocument.get_element_by_id(hash))
 
         jselement.scroll_into_view(el)
