@@ -1,5 +1,5 @@
 name = "gbr_ui_router"
-version = "1.0.2-alpha001"
+version = "1.0.2-alpha002"
 target = "javascript"
 
 description = "📡 Gleam UI SPA router library"
@@ -12,7 +12,7 @@ gbr_js = { path = "../gbr_js" }
 gleam_stdlib = "~> 0.68"
 
 [dev-dependencies]
-gleeunit = "~> 1.9.0"
+gleeunit = "~> 1.9"
 
 [javascript]
 typescript_declarations = true
